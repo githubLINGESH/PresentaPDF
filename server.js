@@ -23,7 +23,7 @@ app.post('/generate-pdf', async (req, res) => {
     try {
         if (!browser) {
             browser = await puppeteer.launch({
-                headless: "new",
+                headless: "true",
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
                 timeout: 60000,
                 ignoreHTTPSErrors: true,
@@ -31,8 +31,8 @@ app.post('/generate-pdf', async (req, res) => {
                 slowMo: 250,
                 devtools: false,
                 protocolTimeout: 60000,
-                args: ['--no-sandbox'],
-                userDataDir: 'D:'
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+                executablePath: 'C:\Program Files\Google\Chrome\Application',
             });
 
             page = await browser.newPage();
