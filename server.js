@@ -32,7 +32,7 @@ app.post('/generate-pdf', async (req, res) => {
                 devtools: false,
                 protocolTimeout: 60000,
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
-                executablePath: 'C:\Program Files\Google\Chrome\Application',
+                executablePath: 'C:\Program Files\Google\Chrome',
             });
 
             page = await browser.newPage();
