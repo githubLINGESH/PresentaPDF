@@ -31,6 +31,8 @@ app.post('/generate-pdf', async (req, res) => {
                 slowMo: 250,
                 devtools: false,
                 protocolTimeout: 60000,
+                args: ['--no-sandbox'],
+                userDataDir: 'D:'
             });
 
             page = await browser.newPage();
