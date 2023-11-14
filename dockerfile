@@ -26,8 +26,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get update
 RUN apt-get install -y google-chrome-stable
 
-# Set the environment variable for Chrome binary
-ENV CHROME_BIN /usr/bin/google-chrome-stable
+
 
 # Bundle app source
 COPY . .
