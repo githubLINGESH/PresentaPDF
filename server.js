@@ -23,7 +23,7 @@ app.post('/generate-pdf', async (req, res) => {
     try {
         if (!browser) {
             browser = await puppeteer.launch({
-                executablePath:"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                executablePath:"/usr/bin/google-chrome",
                 headless: "true",
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
                 timeout: 60000,
