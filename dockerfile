@@ -15,8 +15,8 @@ COPY package*.json ./
 RUN npm install
 RUN npm install puppeteer-core@latest
 
-# Install Chrome
-RUN apt-get update && apt-get install -y google-chrome-stable
+# Install chromium instead of chrome
+RUN apt-get update && apt-get install -y chromium-browser
 
 # Bundle app source
 COPY . .
