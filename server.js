@@ -1,5 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const { firefox } = require('playwright');
 const path = require('path');
 const { PDFDocument } = require('pdf-lib');
 const fs = require('fs');
@@ -21,18 +21,9 @@ app.post('/generate-pdf', async (req, res) => {
     const { link,pages } = req.body;
 
     try {
-        if (!browser) {
-            browser = await puppeteer.launch({
-                executablePath:"/usr/bin/google-chrome",
-                headless: "true",
-                args: ['--no-sandbox', '--disable-setuid-sandbox'],
-                timeout: 60000,
-                ignoreHTTPSErrors: true,
-                waitUntil: 'networkidle0',
-                slowMo: 250,
-                devtools: false,
-                protocolTimeout: 60000,
-            });
+        if (!browser){
+
+            const browser = await firefox.launch();
 
             page = await browser.newPage();
             await page.goto(link, { waitUntil: 'networkidle0' });
