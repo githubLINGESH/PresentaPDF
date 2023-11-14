@@ -15,22 +15,79 @@
  */
 
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
-import {Browser, BrowserPlatform} from './browser-data/browser-data.js';
+import {
+  Browser,
+  type BrowserPlatform,
+  executablePathByBrowser,
+} from './browser-data/browser-data.js';
+import {detectBrowserPlatform} from './detectPlatform.js';
 
 /**
  * @public
  */
-export interface InstalledBrowser {
+export class InstalledBrowser {
+  browser: Browser;
+  buildId: string;
+  platform: BrowserPlatform;
+  readonly executablePath: string;
+
+  #cache: Cache;
+
+  /**
+   * @internal
+   */
+  constructor(
+    cache: Cache,
+    browser: Browser,
+    buildId: string,
+    platform: BrowserPlatform
+  ) {
+    this.#cache = cache;
+    this.browser = browser;
+    this.buildId = buildId;
+    this.platform = platform;
+    this.executablePath = cache.computeExecutablePath({
+      browser,
+      buildId,
+      platform,
+    });
+  }
+
   /**
    * Path to the root of the installation folder. Use
    * {@link computeExecutablePath} to get the path to the executable binary.
    */
-  path: string;
+  get path(): string {
+    return this.#cache.installationDir(
+      this.browser,
+      this.platform,
+      this.buildId
+    );
+  }
+}
+
+/**
+ * @internal
+ */
+export interface ComputeExecutablePathOptions {
+  /**
+   * Determines which platform the browser will be suited for.
+   *
+   * @defaultValue **Auto-detected.**
+   */
+  platform?: BrowserPlatform;
+  /**
+   * Determines which browser to launch.
+   */
   browser: Browser;
+  /**
+   * Determines which buildId to download. BuildId should uniquely identify
+   * binaries and they are used for caching.
+   */
   buildId: string;
-  platform: BrowserPlatform;
 }
 
 /**
@@ -52,6 +109,13 @@ export class Cache {
 
   constructor(rootDir: string) {
     this.#rootDir = rootDir;
+  }
+
+  /**
+   * @internal
+   */
+  get rootDir(): string {
+    return this.#rootDir;
   }
 
   browserRoot(browser: Browser): string {
@@ -106,17 +170,38 @@ export class Cache {
           if (!result) {
             return null;
           }
-          return {
-            path: path.join(this.browserRoot(browser), file),
+          return new InstalledBrowser(
+            this,
             browser,
-            platform: result.platform,
-            buildId: result.buildId,
-          };
+            result.buildId,
+            result.platform as BrowserPlatform
+          );
         })
-        .filter((item): item is InstalledBrowser => {
+        .filter((item: InstalledBrowser | null): item is InstalledBrowser => {
           return item !== null;
         });
     });
+  }
+
+  computeExecutablePath(options: ComputeExecutablePathOptions): string {
+    options.platform ??= detectBrowserPlatform();
+    if (!options.platform) {
+      throw new Error(
+        `Cannot download a binary for the provided platform: ${os.platform()} (${os.arch()})`
+      );
+    }
+    const installationDir = this.installationDir(
+      options.browser,
+      options.platform,
+      options.buildId
+    );
+    return path.join(
+      installationDir,
+      executablePathByBrowser[options.browser](
+        options.platform,
+        options.buildId
+      )
+    );
   }
 }
 
